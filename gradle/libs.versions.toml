@@ -141,6 +141,8 @@ edc-identity-trust-sts-core = { module = "org.eclipse.edc:identity-trust-sts-cor
 edc-identity-trust-sts-api = { module = "org.eclipse.edc:identity-trust-sts-api", version.ref = "edc" }
 edc-identity-trust-sts-client-configuration = { module = "org.eclipse.edc:identity-trust-sts-client-configuration", version.ref = "edc" }
 
+
+
 ## IH for testing
 
 edc-ih-api = { module = "org.eclipse.edc:identity-hub-api", version.ref = "edc" }
