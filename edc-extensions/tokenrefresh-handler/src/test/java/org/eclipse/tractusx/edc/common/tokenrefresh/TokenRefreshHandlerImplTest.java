@@ -36,8 +36,8 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.assertj.core.api.Assertions;
 import org.eclipse.edc.edr.spi.store.EndpointDataReferenceCache;
+import org.eclipse.edc.http.spi.EdcHttpClient;
 import org.eclipse.edc.identitytrust.SecureTokenService;
-import org.eclipse.edc.spi.http.EdcHttpClient;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.spi.result.StoreResult;
@@ -56,19 +56,21 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.eclipse.edc.junit.assertions.AbstractResultAssert.assertThat;
-import static org.eclipse.tractusx.edc.common.tokenrefresh.TokenRefreshHandlerImpl.PROPERTY_AUTHORIZATION;
-import static org.eclipse.tractusx.edc.common.tokenrefresh.TokenRefreshHandlerImpl.PROPERTY_EXPIRES_IN;
-import static org.eclipse.tractusx.edc.common.tokenrefresh.TokenRefreshHandlerImpl.PROPERTY_REFRESH_ENDPOINT;
-import static org.eclipse.tractusx.edc.common.tokenrefresh.TokenRefreshHandlerImpl.PROPERTY_REFRESH_TOKEN;
+import static org.eclipse.tractusx.edc.edr.spi.CoreConstants.EDR_PROPERTY_AUTHORIZATION;
+import static org.eclipse.tractusx.edc.edr.spi.CoreConstants.EDR_PROPERTY_EXPIRES_IN;
+import static org.eclipse.tractusx.edc.edr.spi.CoreConstants.EDR_PROPERTY_REFRESH_ENDPOINT;
+import static org.eclipse.tractusx.edc.edr.spi.CoreConstants.EDR_PROPERTY_REFRESH_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
 
 class TokenRefreshHandlerImplTest {
     public static final String REFRESH_ENDPOINT = "http://fizz.buzz/quazz";
@@ -101,18 +103,17 @@ class TokenRefreshHandlerImplTest {
     @Test
     void refresh_validateCorrectRequest() throws IOException {
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().build()));
-        when(edrCache.put(any(), any())).thenReturn(StoreResult.success());
-        when(mockedTokenService.createToken(anyMap(), anyString())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
+        when(mockedTokenService.createToken(anyMap(), isNull())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
         var tokenResponse = new TokenResponse("new-access-token", "new-refresh-token", 60 * 5L, "bearer");
         var successResponse = createResponse(tokenResponse, 200, "");
         when(mockedHttpClient.execute(any())).thenReturn(successResponse);
         var res = tokenRefreshHandler.refreshToken("token-id");
         assertThat(res).isSucceeded()
                 .satisfies(tr -> {
-                    Assertions.assertThat(tr.getProperties()).containsEntry(PROPERTY_AUTHORIZATION, "new-access-token");
-                    Assertions.assertThat(tr.getProperties()).containsEntry(PROPERTY_EXPIRES_IN, "300");
-                    Assertions.assertThat(tr.getProperties()).containsEntry(PROPERTY_REFRESH_TOKEN, "new-refresh-token");
-                    Assertions.assertThat(tr.getProperties()).containsEntry(PROPERTY_REFRESH_ENDPOINT, REFRESH_ENDPOINT);
+                    Assertions.assertThat(tr.getProperties()).containsEntry(EDR_PROPERTY_AUTHORIZATION, "new-access-token");
+                    Assertions.assertThat(tr.getProperties()).containsEntry(EDR_PROPERTY_EXPIRES_IN, "300");
+                    Assertions.assertThat(tr.getProperties()).containsEntry(EDR_PROPERTY_REFRESH_TOKEN, "new-refresh-token");
+                    Assertions.assertThat(tr.getProperties()).containsEntry(EDR_PROPERTY_REFRESH_ENDPOINT, REFRESH_ENDPOINT);
                 });
     }
 
@@ -132,9 +133,9 @@ class TokenRefreshHandlerImplTest {
     @ArgumentsSource(InvalidEdrProvider.class)
     void refresh_edrLacksRequiredProperties(String authorization, String refreshToken, String refreshEndpoint, String desc) {
         var invalidEdr = DataAddress.Builder.newInstance().type("test-type")
-                .property("authorization", authorization)
-                .property("refreshToken", refreshToken)
-                .property("refreshEndpoint", refreshEndpoint)
+                .property(EDR_PROPERTY_AUTHORIZATION, authorization)
+                .property(EDR_PROPERTY_REFRESH_TOKEN, refreshToken)
+                .property(EDR_PROPERTY_REFRESH_ENDPOINT, refreshEndpoint)
                 .build();
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(invalidEdr));
 
@@ -146,7 +147,7 @@ class TokenRefreshHandlerImplTest {
     @Test
     void refresh_endpointReturnsFailure() throws IOException {
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().build()));
-        when(mockedTokenService.createToken(anyMap(), anyString())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
+        when(mockedTokenService.createToken(anyMap(), isNull())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
         var response401 = createResponse(null, 401, "Not authorized");
 
         when(mockedHttpClient.execute(any())).thenReturn(response401);
@@ -159,9 +160,10 @@ class TokenRefreshHandlerImplTest {
     @Test
     void refresh_endpointReturnsEmptyBody() throws IOException {
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().build()));
-        when(mockedTokenService.createToken(anyMap(), anyString())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
+        when(mockedTokenService.createToken(anyMap(), isNull())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
         var successResponse = createResponse(null, 200, "");
         when(mockedHttpClient.execute(any())).thenReturn(successResponse);
+
         var res = tokenRefreshHandler.refreshToken("token-id");
         assertThat(res).isFailed()
                 .detail().isEqualTo("Token refresh successful, but body was empty.");
@@ -170,7 +172,7 @@ class TokenRefreshHandlerImplTest {
     @Test
     void refresh_ioException() throws IOException {
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().build()));
-        when(mockedTokenService.createToken(anyMap(), anyString())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
+        when(mockedTokenService.createToken(anyMap(), isNull())).thenReturn(Result.success(TokenRepresentation.Builder.newInstance().token("foo-auth-token").build()));
         when(mockedHttpClient.execute(any())).thenThrow(new IOException("test exception"));
 
         assertThat(tokenRefreshHandler.refreshToken("token-id")).isFailed()
@@ -179,7 +181,7 @@ class TokenRefreshHandlerImplTest {
 
     @Test
     void refresh_accessTokenIsNotJwt() {
-        when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().property(PROPERTY_AUTHORIZATION, "not-jwt").build()));
+        when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().property(EDR_PROPERTY_AUTHORIZATION, "not-jwt").build()));
         assertThat(tokenRefreshHandler.refreshToken("token-id")).isFailed()
                 .detail().startsWith("Could not execute token refresh: Failed to parse string claim 'iss'");
     }
@@ -187,7 +189,7 @@ class TokenRefreshHandlerImplTest {
     @Test
     void refresh_tokenGenerationFailed() {
         when(edrCache.get(anyString())).thenReturn(StoreResult.success(createEdr().build()));
-        when(mockedTokenService.createToken(anyMap(), anyString())).thenReturn(Result.failure("foobar"));
+        when(mockedTokenService.createToken(anyMap(), isNull())).thenReturn(Result.failure("foobar"));
         assertThat(tokenRefreshHandler.refreshToken("token-id")).isFailed()
                 .detail().isEqualTo("Could not execute token refresh: foobar");
     }
@@ -207,9 +209,9 @@ class TokenRefreshHandlerImplTest {
     private DataAddress.Builder createEdr() {
         return DataAddress.Builder.newInstance()
                 .type("HttpData")
-                .property(PROPERTY_AUTHORIZATION, createJwt())
-                .property(PROPERTY_REFRESH_TOKEN, "foo-refresh-token")
-                .property(PROPERTY_REFRESH_ENDPOINT, REFRESH_ENDPOINT);
+                .property(EDR_PROPERTY_AUTHORIZATION, createJwt())
+                .property(EDR_PROPERTY_REFRESH_TOKEN, "foo-refresh-token")
+                .property(EDR_PROPERTY_REFRESH_ENDPOINT, REFRESH_ENDPOINT);
     }
 
     private static class InvalidEdrProvider implements ArgumentsProvider {

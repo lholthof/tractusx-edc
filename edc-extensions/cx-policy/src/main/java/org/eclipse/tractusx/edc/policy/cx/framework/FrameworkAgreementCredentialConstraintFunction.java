@@ -25,8 +25,8 @@ import org.eclipse.edc.policy.model.Operator;
 import org.eclipse.edc.policy.model.Permission;
 import org.eclipse.edc.spi.agent.ParticipantAgent;
 import org.eclipse.edc.spi.result.Result;
+import org.eclipse.tractusx.edc.core.utils.credentials.CredentialTypePredicate;
 import org.eclipse.tractusx.edc.policy.cx.common.AbstractDynamicCredentialConstraintFunction;
-import org.eclipse.tractusx.edc.policy.cx.common.CredentialTypePredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -173,7 +173,7 @@ public class FrameworkAgreementCredentialConstraintFunction extends AbstractDyna
     @NotNull
     private List<Predicate<VerifiableCredential>> createPredicates(String subtype, @Nullable String version) {
         var list = new ArrayList<Predicate<VerifiableCredential>>();
-        list.add(new CredentialTypePredicate(CX_CREDENTIAL_NS + capitalize(subtype) + CREDENTIAL_LITERAL));
+        list.add(new CredentialTypePredicate(CX_CREDENTIAL_NS, capitalize(subtype) + CREDENTIAL_LITERAL));
 
         if (version != null) {
             list.add(credential -> credential.getCredentialSubject().stream().anyMatch(cs -> version.equals(cs.getClaims().getOrDefault(CONTRACT_VERSION_PROPERTY, null))));

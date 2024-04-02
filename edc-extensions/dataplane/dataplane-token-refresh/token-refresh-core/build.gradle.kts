@@ -23,16 +23,19 @@ plugins {
 
 dependencies {
     api(project(":spi:tokenrefresh-spi"))
+    api(project(":spi:core-spi"))
     implementation(libs.edc.spi.core)
     implementation(libs.edc.spi.token)
+    implementation(libs.edc.spi.keys)
     implementation(libs.edc.spi.identity.did)
     implementation(libs.edc.spi.dataplane.dataplane)
     implementation(libs.edc.core.token)
+    implementation(libs.edc.lib.query)
+    implementation(libs.edc.lib.cryptocommon)
 
     testImplementation(libs.edc.junit)
     testImplementation(libs.edc.dpf.core)
     testImplementation(libs.edc.core.connector)
-    testImplementation(libs.edc.common.crypto)
     testImplementation(libs.edc.lib.boot)
 }
 

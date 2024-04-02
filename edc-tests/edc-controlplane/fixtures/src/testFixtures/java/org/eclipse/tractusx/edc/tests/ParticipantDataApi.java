@@ -20,7 +20,7 @@
 package org.eclipse.tractusx.edc.tests;
 
 import jakarta.json.JsonObject;
-import org.eclipse.edc.spi.types.domain.edr.EndpointDataReference;
+import org.eclipse.edc.spi.types.domain.DataAddress;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ParticipantDataApi {
 
     /**
-     * Pull the data with an {@link EndpointDataReference}
+     * Pull the data with an {@link DataAddress}
      *
      * @param edr         The edr
      * @param queryParams additional params
@@ -53,4 +53,5 @@ public class ParticipantDataApi {
         assertThat(response.statusCode()).isBetween(200, 300);
         return response.body().asString();
     }
+
 }

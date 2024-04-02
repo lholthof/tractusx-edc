@@ -28,13 +28,13 @@ dependencies {
     implementation(libs.edc.boot)
     implementation(libs.edc.iam.mock)
     implementation(project(":edc-controlplane:edc-controlplane-base")) {
-        exclude("org.eclipse.tractusx.edc", "data-encryption")
         exclude(module = "ssi-miw-credential-client")
         exclude(module = "ssi-identity-core")
         exclude(module = "auth-tokenbased")
         // the token refresh extension is not needed
         exclude(module = "tx-iatp-sts-dim")
         exclude(module = "tokenrefresh-handler")
+        exclude(module = "edr-core")
         exclude(module = "edr-api-v2")
         exclude(module = "edr-callback")
     }

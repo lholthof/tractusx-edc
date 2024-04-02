@@ -147,23 +147,6 @@ spec:
             - name: EDC_PARTICIPANT_ID
               value: {{ .Values.participant.id | required ".Values.participant.id is required" | quote }}
 
-            ##########################
-            # SSI / MIW CONFIGURATION
-            ##########################
-            - name: "TX_SSI_MIW_URL"
-              value: {{ .Values.runtime.ssi.miw.url | quote }}
-            - name: "TX_SSI_MIW_AUTHORITY_ID"
-              value: {{ .Values.runtime.ssi.miw.authorityId | quote }}
-            - name: "TX_SSI_OAUTH_TOKEN_URL"
-              value: {{ .Values.runtime.ssi.oauth.tokenurl | quote }}
-            - name: "TX_SSI_OAUTH_CLIENT_ID"
-              value: {{ .Values.runtime.ssi.oauth.client.id | quote }}
-            - name: "TX_SSI_OAUTH_CLIENT_SECRET_ALIAS"
-              value: {{ .Values.runtime.ssi.oauth.client.secretAlias | quote }}
-            - name: "TX_SSI_ENDPOINT_AUDIENCE"
-              value: {{ printf "%s%s" (include "txdc.runtime.url.protocol" .) .Values.runtime.endpoints.protocol.path | quote }}
-
-
             #######
             # API #
             #######
@@ -254,16 +237,6 @@ spec:
             # see extension https://github.com/eclipse-tractusx/tractusx-edc/tree/develop/edc-extensions/hashicorp-vault
             - name: "EDC_VAULT_SECRETS"
               value: {{ .Values.vault.secrets | quote}}
-
-            #####################
-            ## DATA ENCRYPTION ##
-            #####################
-
-            # see extension https://github.com/eclipse-tractusx/tractusx-edc/tree/develop/edc-extensions/data-encryption
-            - name: "EDC_DATA_ENCRYPTION_KEYS_ALIAS"
-              value: {{ .Values.vault.secretNames.transferProxyTokenEncryptionAesKey | quote }}
-            - name: "EDC_DATA_ENCRYPTION_ALGORITHM"
-              value: "AES"
 
             ###########################
             ## AAS WRAPPER EXTENSION ##
