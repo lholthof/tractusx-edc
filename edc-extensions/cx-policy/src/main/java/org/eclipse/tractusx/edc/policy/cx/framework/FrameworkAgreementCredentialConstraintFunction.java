@@ -173,7 +173,8 @@ public class FrameworkAgreementCredentialConstraintFunction extends AbstractDyna
     @NotNull
     private List<Predicate<VerifiableCredential>> createPredicates(String subtype, @Nullable String version) {
         var list = new ArrayList<Predicate<VerifiableCredential>>();
-        list.add(new CredentialTypePredicate(CX_CREDENTIAL_NS, capitalize(subtype) + CREDENTIAL_LITERAL));
+        Predicate<VerifiableCredential> predicate = new CredentialTypePredicate(CX_CREDENTIAL_NS, capitalize(subtype) + CREDENTIAL_LITERAL);
+        list.add(predicate);
 
         if (version != null) {
             list.add(credential -> credential.getCredentialSubject().stream().anyMatch(cs -> version.equals(cs.getClaims().getOrDefault(CONTRACT_VERSION_PROPERTY, null))));

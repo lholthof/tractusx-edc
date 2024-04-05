@@ -24,7 +24,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.edc.spi.core)
+//    implementation(libs.edc.spi.core)
     runtimeOnly(project(":edc-controlplane:edc-controlplane-base")) {
         exclude(module = "data-encryption")
         exclude(module = "ssi-miw-credential-client")
@@ -32,27 +32,16 @@ dependencies {
         exclude(module = "ssi-identity-extractor")
     }
     runtimeOnly(project(":edc-dataplane:edc-dataplane-base"))
+
     runtimeOnly(libs.edc.core.controlplane)
     testImplementation(libs.edc.junit)
     testImplementation(libs.edc.lib.boot)
-
-    //implementation(project(":extensions:common:iam:decentralized-identity"))
-    implementation(libs.edc.identity.core.did)
-
-    //implementation(project(":extensions:common:iam:identity-trust"))
+    implementation(libs.edc.core.did)
     implementation(libs.edc.identity.trust.issuers.configuration)
-//    implemenation(libs.edc.identity.trust.transform)
-//    implementation(libs.edc.identity.trust.jws2020)
-//    implementation(libs.edc.identity.trust.vc.jwt)
-//    implementation(libs.edc.identity.trust.vc.ldp)
-    implementation(libs.edc.identity.core.trust)
-    implementation(libs.edc.identity.trust.spi)
-
-    //implementation(project(":extensions:common:vault:vault-filesystem"))
+    implementation(libs.edc.core.identitytrust)
+    implementation(libs.edc.spi.identitytrust)
     implementation(libs.edc.vault.filesystem)
-    //implementation(project(":extensions:common:iam:oauth2:oauth2-client"))
     implementation(libs.edc.auth.oauth2.client)
-    //implementation(project(":extensions:common:iam:decentralized-identity:identity-did-web"))
     implementation(libs.edc.identity.did.web)
 
     implementation(project(":edc-extensions:iatp:tx-iatp-sts-dim"))
@@ -65,6 +54,14 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
     archiveFileName.set("${project.name}.jar")
 }
+
+//tasks.withType<Tar> {
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
+//
+//tasks.withType<Zip>{
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
 
 application {
     mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
