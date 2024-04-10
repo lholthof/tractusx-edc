@@ -94,6 +94,8 @@ include(":edc-dataplane:edc-dataplane-azure-vault")
 include(":edc-dataplane:edc-dataplane-base")
 include(":edc-dataplane:edc-dataplane-hashicorp-vault")
 
+include(":bdrsmock")
+
 
 
 include(":samples:multi-tenancy")
@@ -111,6 +113,25 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    versionCatalogs {
+        /**********************************
+         * Dependency Catalog for SSI-MOCK
+         **********************************/
+        create("bdrsmock") {
+            // SSI-MOCK
+            library("jetty-server", "org.eclipse.jetty", "jetty-server").version("12.0.7")
+            library("jetty-servlet", "org.eclipse.jetty.ee10", "jetty-ee10-servlet").version(
+                "12.0.7"
+            )
+            library("slf4j-simple", "org.slf4j", "slf4j-simple").version("2.0.12")
+            bundle("jetty", listOf("jetty-server", "jetty-servlet"))
+        }
+
+        create("libs") {
+            library("nimbus.jwt", "com.nimbusds", "nimbus-jose-jwt").version("9.37.3")
+            library("jackson-databind", "com.fasterxml.jackson.core", "jackson-databind").version("2.17.0")
+        }
+    }
     repositories {
         maven {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")

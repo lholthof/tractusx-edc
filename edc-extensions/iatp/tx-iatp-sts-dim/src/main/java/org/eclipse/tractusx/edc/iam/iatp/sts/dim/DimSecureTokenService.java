@@ -88,7 +88,7 @@ public class DimSecureTokenService implements SecureTokenService {
 
     public DimSecureTokenService(EdcHttpClient httpClient, String dimUrl, DimOauth2Client dimOauth2Client, ObjectMapper mapper, Monitor monitor) {
         this.httpClient = httpClient;
-        this.dimUrl = dimUrl + "/iatp" + "/holderapplication567292";
+        this.dimUrl = dimUrl; //+ "/iatp" + "/holderapplication567292";
         this.dimOauth2Client = dimOauth2Client;
         this.mapper = mapper;
         this.monitor = monitor;
