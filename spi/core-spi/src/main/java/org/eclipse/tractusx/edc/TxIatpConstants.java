@@ -1,5 +1,5 @@
-/********************************************************************************
- * Copyright (c) 2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+/*
+ * Copyright (c) 2024 Bayerische Motoren Werke Aktiengesellschaft
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -15,13 +15,20 @@
  * under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- ********************************************************************************/
+ */
 
-plugins {
-    `java-library`
-    `maven-publish`
-}
+package org.eclipse.tractusx.edc;
 
-dependencies {
-    implementation(libs.edc.runtime.metamodel)
+import java.util.Set;
+
+import static java.lang.String.format;
+
+public interface TxIatpConstants {
+
+    String CREDENTIAL_TYPE_NAMESPACE = "org.eclipse.tractusx.vc.type";
+    String DEFAULT_CREDENTIAL = "MembershipCredential";
+    String READ_OPERATION = "read";
+    String DEFAULT_MEMBERSHIP_SCOPE = format("%s:%s:%s", CREDENTIAL_TYPE_NAMESPACE, DEFAULT_CREDENTIAL, READ_OPERATION);
+    Set<String> DEFAULT_SCOPES = Set.of(DEFAULT_MEMBERSHIP_SCOPE);
+
 }
